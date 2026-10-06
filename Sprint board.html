@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sprint board</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#e9eeea;--ink:#1c2a2f;--muted:#566468;--card:#fffdf4;--line:#c5d0ca;--accent:#1f6f5c;--on:#fff;--todo:#f4e7a1;--doing:#b9dcf2;--done:#bfe3c9;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141c1e;--ink:#e6eeea;--muted:#9bacaa;--card:#1f2b2d;--line:#32423f;--accent:#5cc2a6;--on:#0e1a17;--todo:#5a5120;--doing:#244a63;--done:#24533a}}
+:root[data-theme="dark"]{--bg:#141c1e;--ink:#e6eeea;--muted:#9bacaa;--card:#1f2b2d;--line:#32423f;--accent:#5cc2a6;--on:#0e1a17;--todo:#5a5120;--doing:#244a63;--done:#24533a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Bricolage Grotesque",system-ui,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:2.2rem;line-height:1.1;margin:0 0 4px;font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.1rem;margin:0 0 8px}
+p{margin:0 0 8px;max-width:65ch}
+.sub{color:var(--muted)}
+.meter{margin:16px 0 20px}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+button,select,input{font:inherit;color:inherit}
+.tab{border:1px solid var(--line);background:none;padding:6px 14px;border-radius:20px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--on);border-color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.add{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.add input{flex:1 1 240px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.add select{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.btn{background:var(--accent);color:var(--on);border:0;padding:9px 16px;border-radius:8px;cursor:pointer;font-weight:600}
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width:900px){.cols{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.cols{grid-template-columns:1fr}}
+.col{background:color-mix(in srgb,var(--card) 50%,transparent);border:1px solid var(--line);border-radius:12px;padding:12px;min-height:120px}
+.col h2 span{color:var(--muted);font-weight:400}
+.note{background:var(--todo);padding:10px 12px;border-radius:4px 4px 14px 4px;margin-bottom:10px;transform:rotate(-.4deg)}
+.col[data-s="0"] .note{background:var(--card);border:1px dashed var(--muted)}
+.col[data-s="2"] .note{background:var(--doing)}
+.col[data-s="3"] .note{background:var(--done)}
+.note:nth-child(even){transform:rotate(.5deg)}
+.note p{margin:0 0 8px}
+.row{display:flex;align-items:center;gap:6px}
+.pts{font-size:.8rem;font-weight:600;background:var(--card);padding:1px 8px;border-radius:10px;margin-right:auto}
+.row button{border:1px solid var(--ink);background:var(--card);border-radius:6px;padding:2px 9px;cursor:pointer}
+.row button:disabled{opacity:.3;cursor:default}
+.empty{color:var(--muted);font-size:.9rem}
+.log section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.log ul{margin:0 0 8px;padding-left:20px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Sprint board</h1>
+<p class="sub">A small task board built with Scrum. The stories on it are its own Product Backlog.</p>
+<p><b>Sprint 3 goal:</b> make moving and editing stories fast.</p>
+<div class="meter">
+  <div class="row"><strong id="mt">0 of 0 points done</strong></div>
+  <div class="bar" role="progressbar" aria-label="Points done" id="pb"><i id="pf"></i></div>
+</div>
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t1" aria-selected="true">Board</button>
+  <button class="tab" role="tab" id="t2" aria-selected="false">Scrum</button>
+</div>
+
+<div id="board">
+  <div class="add">
+    <input id="ti" placeholder="As a user, I can…" aria-label="Story title" maxlength="120">
+    <select id="pi" aria-label="Story points"><option>1</option><option selected>2</option><option>3</option><option>5</option><option>8</option></select>
+    <button class="btn" id="ab">Add to backlog</button>
+  </div>
+  <div class="cols" id="cols"></div>
+</div>
+
+<div id="log" class="log" hidden>
+  <section>
+    <h2>Product Goal</h2>
+    <p>Help a small team see, order and finish its work on one simple board.</p>
+  </section>
+  <section>
+    <h2>Scrum Team</h2>
+    <ul><li><b>Product Owner:</b> you. Orders the Product Backlog and accepts finished work.</li><li><b>Scrum Master:</b> keeps events time-boxed and clears blockers.</li><li><b>Developers:</b> Claude. Builds a usable Increment each sprint.</li></ul>
+  </section>
+  <section>
+    <h2>Events</h2>
+    <ul><li><b>Sprint:</b> one week, one Sprint Goal.</li><li><b>Sprint Planning:</b> pick stories that fit last velocity.</li><li><b>Daily Scrum:</b> 15 minutes. What moved, what is blocked.</li><li><b>Sprint Review:</b> demo the Increment, adjust the backlog.</li><li><b>Sprint Retrospective:</b> choose one improvement.</li></ul>
+  </section>
+  <section>
+    <h2>Sprint 1 (velocity 7)</h2>
+    <p><b>Goal:</b> a person can add a story and move it across the board.</p>
+    <p class="sub">Add a story (3), move a story (3), delete a story (1). Increment accepted.</p>
+  </section>
+  <section>
+    <h2>Sprint 2 (velocity 7)</h2>
+    <p><b>Goal:</b> the board shows progress and keeps its data.</p>
+    <p class="sub">Story points (2), sprint progress (3), keep the board after refresh (2). Increment accepted.</p>
+    <p><b>Retrospective:</b> button-based moves feel clunky. Next sprint targets that.</p>
+  </section>
+  <section>
+    <h2>Sprint 3 (in progress, planned 7)</h2>
+    <p><b>Goal:</b> make moving and editing stories fast.</p>
+    <p class="sub">Edit a story title in place (2), drag and drop stories (5). Planned points match last velocity.</p>
+  </section>
+  <section>
+    <h2>Definition of Done</h2>
+    <p>Works on a phone, usable by keyboard, survives a refresh, and demoed at Sprint Review.</p>
+  </section>
+</div>
+</main>
+
+<script>
+var NAMES=["Product backlog","Sprint backlog","In progress","Done"];
+var CUR=3,VEL=7;
+var seed=[
+["Add a story to the board",3,3,1],["Move a story between columns",3,3,1],["Delete a story",1,3,1],
+["Give each story points",2,3,2],["Show sprint progress",3,3,2],["Keep the board after refresh",2,3,2],
+["Edit a story title in place",2,1,3],["Drag and drop stories",5,1,3],
+["Filter stories by status",2,0,null],["Share the board as a link",5,0,null]];
+var tasks=null,nid=1;
+try{var raw=localStorage.getItem("sprint-board-v2");if(raw){tasks=JSON.parse(raw)}}catch(e){}
+if(!Array.isArray(tasks)){tasks=seed.map(function(x){return{id:nid++,t:x[0],p:x[1],s:x[2],sp:x[3]}})}
+nid=tasks.reduce(function(m,t){return Math.max(m,t.id)},0)+1;
+
+function save(){try{localStorage.setItem("sprint-board-v2",JSON.stringify(tasks))}catch(e){}}
+function el(tag,cls,txt){var n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n}
+function move(t,d){t.s+=d;t.sp=t.s===0?null:CUR;save();render()}
+
+function render(){
+  var cols=document.getElementById("cols");cols.innerHTML="";
+  NAMES.forEach(function(name,s){
+    var col=el("div","col");col.dataset.s=s;
+    var list=tasks.filter(function(t){return t.s===s});
+    var h=el("h2",null,name+" ");h.appendChild(el("span",null,"("+list.length+")"));col.appendChild(h);
+    if(!list.length)col.appendChild(el("p","empty",s===0?"Backlog is empty. Add a story above.":"Nothing here yet."));
+    list.forEach(function(t){
+      var locked=t.sp&&t.sp<CUR;
+      var n=el("div","note");n.appendChild(el("p",null,t.t));
+      var r=el("div","row");r.appendChild(el("span","pts",t.p+(t.p===1?" point":" points")+(locked?", Sprint "+t.sp:"")));
+      if(!locked){
+        var b=el("button",null,"\u2190");b.setAttribute("aria-label","Move back: "+t.t);b.disabled=s===0;b.onclick=function(){move(t,-1)};
+        var f=el("button",null,"\u2192");f.setAttribute("aria-label","Move forward: "+t.t);f.disabled=s===3;f.onclick=function(){move(t,1)};
+        var d=el("button",null,"Delete");d.setAttribute("aria-label","Delete: "+t.t);d.onclick=function(){tasks=tasks.filter(function(x){return x!==t});save();render()};
+        r.append(b,f,d);
+      }
+      n.appendChild(r);col.appendChild(n);
+    });
+    cols.appendChild(col);
+  });
+  var sprint=tasks.filter(function(t){return t.sp===CUR});
+  var planned=sprint.reduce(function(a,t){return a+t.p},0);
+  var done=sprint.filter(function(t){return t.s===3}).reduce(function(a,t){return a+t.p},0);
+  var pct=planned?Math.round(done/planned*100):0;
+  var txt="Sprint "+CUR+": "+done+" of "+planned+" points done";
+  if(planned>VEL)txt+=" (planned above last velocity of "+VEL+")";
+  document.getElementById("mt").textContent=txt;
+  document.getElementById("pf").style.width=pct+"%";
+  var pb=document.getElementById("pb");pb.setAttribute("aria-valuenow",pct);pb.setAttribute("aria-valuemin",0);pb.setAttribute("aria-valuemax",100);
+}
+
+function add(){
+  var i=document.getElementById("ti"),v=i.value.trim();
+  if(!v){i.focus();return}
+  tasks.push({id:nid++,t:v,p:parseInt(document.getElementById("pi").value,10),s:0,sp:null});
+  i.value="";save();render();i.focus();
+}
+document.getElementById("ab").onclick=add;
+document.getElementById("ti").onkeydown=function(e){if(e.key==="Enter")add()};
+
+function tab(which){
+  document.getElementById("board").hidden=which!==1;
+  document.getElementById("log").hidden=which!==2;
+  document.getElementById("t1").setAttribute("aria-selected",which===1);
+  document.getElementById("t2").setAttribute("aria-selected",which===2);
+}
+document.getElementById("t1").onclick=function(){tab(1)};
+document.getElementById("t2").onclick=function(){tab(2)};
+render();
+</script>
+</body>
+</html>
